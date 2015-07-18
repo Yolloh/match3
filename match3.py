@@ -1,13 +1,5 @@
 import itertools
-
-a = [ [ 1, 2, 3], [ 1, 2, 4], [ 1, 1, 1 ] ]
-b = [   [ 1, 2, 3, 4],
-        [ 1, 2, 3, 4],
-        [ 1, 2, 3, 4],
-        [ 5, 6, 3, 8]   ]
-
-numRows = len(a)
-numCols = len(a[0])
+import unittest
 
 def hasMatchOfExactLength(matchLength, row):
     groups = [(k, sum(1 for i in g)) for k,g in itertools.groupby(row)]
@@ -40,8 +32,21 @@ def countMatchN(matchLength, board):
         return min(r,c)
     return countMatchInRows(matchLength, board) + countMatchInColumns(matchLength, board)
 
-print('"a" match3s: %d' % (countMatchThrees(a)))
-print('"b" match3s: %d' % (countMatchThrees(b)))
-print('"a" match2s: %d' % (countMatchN(2,a)))
-print('"b" match1s: %d' % (countMatchN(1,b)))
+
+class Match3Tests( unittest.TestCase):
+    def test_pinningOriginalBehavior(self):
+        a = [ [ 1, 2, 3], 
+              [ 1, 2, 4], 
+              [ 1, 1, 1] ]
+        b = [ [ 1, 2, 3, 4],
+              [ 1, 2, 3, 4],
+              [ 1, 2, 3, 4],
+              [ 5, 6, 3, 8] ]
+        self.assertEqual( countMatchThrees(a), 2)
+        self.assertEqual( countMatchThrees(b), 3)
+        self.assertEqual( countMatchN(2, a), 1)
+        self.assertEqual( countMatchN(1, b), 3)
+
+if __name__ == '__main__':
+    unittest.main()
 
