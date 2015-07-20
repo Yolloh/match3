@@ -9,8 +9,8 @@ def hasMatchOfExactLength(matchLength, row):
             return True
     return False
 
-def transposeBoard( board):
-    return zip(*board)
+def _transposeBoard( board):
+    return [list(i) for i in zip(*board)]
 
 def countMatchInRows(matchLength, board):
     count = 0
@@ -20,7 +20,7 @@ def countMatchInRows(matchLength, board):
     return count
     
 def countMatchInColumns(matchLength, board):
-    board = transposeBoard(board)
+    board = _transposeBoard(board)
     return countMatchInRows(matchLength, board)
 
 def countMatchThrees(board):
@@ -58,7 +58,9 @@ def slideDownToFill( board):
 def _slideDownOnce( board):
     slideOccurred = False
     for rowIndex in range(0, len(board) - 1):
-        slideOccurred, topRow, bottomRow = _slideDownRow( board[rowIndex], board[rowIndex+1])
+        slid, topRow, bottomRow = _slideDownRow( board[rowIndex], board[rowIndex+1])
+        if slid:
+            slideOccurred = True
         board[rowIndex] = topRow
         board[rowIndex+1] = bottomRow
     return (slideOccurred, board)
@@ -95,6 +97,35 @@ def _removeMatchesInRow(matchLength, row):
     else:
         result += currentRun
     return result
+
+def _removeHorizontalMatches(matchLength, board):
+    result = []
+    for row in board:
+        result.append( _removeMatchesInRow( matchLength, row))
+    return result
+
+def _removeVerticalMatches( matchLength, board):
+    board = _transposeBoard(board)
+    board = _removeHorizontalMatches( matchLength, board)
+    board = _transposeBoard(board)
+    return board
+
+def _combineBoards( left, right):
+    result = []
+    for leftRow, rightRow in zip(left,right):
+        resultRow = []
+        for leftCell, rightCell in zip(leftRow, rightRow):
+            if leftCell is None or rightCell is None:
+                resultRow.append(None)
+            else:
+                resultRow.append(leftCell)
+        result.append(resultRow)
+    return( result)
+
+def removeMatches( matchLength, board):
+    rowResult = _removeHorizontalMatches( matchLength, board)
+    colResult = _removeVerticalMatches( matchLength, board) 
+    return _combineBoards( rowResult, colResult)
 
 class Match3Tests( unittest.TestCase):
     def test_pinningOriginalBehavior(self):
@@ -141,9 +172,19 @@ class Match3Tests( unittest.TestCase):
                   [ None, 4, 5],
                   [None, None, 6] ]
         result = slideDownToFill( given)
-        self.assertListEqual( result[0], [None, None, 3])    
-        self.assertListEqual( result[1], [None, 2, 5])
-        self.assertListEqual( result[2], [1, 4, 6])    
+        self.assertBoardEqual( result, [ [None, None, 3],
+                                         [None, 2, 5],
+                                         [1, 4, 6] ] )
+    def test_slideDownToFill_worksWithLargerBoards(self):
+        given = [ [ 1, 2, 3, 1 ],
+                  [ None, 4, 5, 1],
+                  [ None, None, 6, 1],
+                  [ None, None, None, None ]]
+        result = slideDownToFill( given)
+        self.assertBoardEqual( result, [ [None, None, None, None],
+                                         [None, None, 3, 1],
+                                         [None, 2, 5, 1],
+                                         [1, 4, 6, 1] ] )
     def test__slideDownRow(self):
         top = [ 1, 2]
         bottom = [ None, 3 ]
@@ -171,6 +212,33 @@ class Match3Tests( unittest.TestCase):
         given = [ 4, 2, 2, 2, 3, 7, 7, 7, 9]
         result = _removeMatchesInRow(3, given)
         self.assertListEqual(result, [ 4, None, None, None, 3, None, None, None, 9])
+    def test_removeMatches_removesHorizontalMatch(self):
+        given = [ [ 1, 1, 1],
+                  [ 2, 3, 3],
+                  [ 3, 3, 4] ]
+        result = removeMatches(3, given)
+        self.assertBoardEqual( result, [ [ None, None, None],
+                                         [ 2, 3, 3],
+                                         [ 3, 3, 4] ] )
+    def assertBoardEqual( self, result, expected):
+        for expectedRow, resultRow in zip(expected, result):
+            self.assertListEqual(expectedRow, resultRow)
+    def test_removeMatches_removesVerticalMatch(self):
+        given = [ [1, 2, 3],
+                  [1, 3, 4],
+                  [1, 2, 4] ]
+        result = removeMatches(3, given)
+        self.assertBoardEqual( result, [[ None, 2, 3],
+                                        [ None, 3, 4],
+                                        [ None, 2, 4]])
+    def test_removeMatches_removesIntersectingMatches(self):
+        given = [ [1, 1, 1],
+                  [1, 3, 4],
+                  [1, 2, 4] ]
+        result = removeMatches(3, given)
+        self.assertBoardEqual( result, [[ None, None, None],
+                                        [ None, 3, 4],
+                                        [ None, 2, 4]])
 
 if __name__ == '__main__':
     unittest.main()
