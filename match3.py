@@ -76,6 +76,26 @@ def _slideDownRow( topRow, bottomRow):
         newBottomRow.append( bottomCell)
     return (slideOccurred, newTopRow, newBottomRow)
 
+def _removeMatchesInRow(matchLength, row):
+    result = []
+    matchTarget = None
+    currentRun = []
+    for cell in row:
+        if cell == matchTarget:
+            currentRun.append(cell)
+        else:
+            if len(currentRun)  == matchLength:
+                result += [None]*matchLength
+            else:
+                result += currentRun
+            currentRun = [ cell]
+            matchTarget = cell
+    if len(currentRun) == matchLength:
+        result += [None]*matchLength
+    else:
+        result += currentRun
+    return result
+
 class Match3Tests( unittest.TestCase):
     def test_pinningOriginalBehavior(self):
         a = [ [ 1, 2, 3], 
@@ -121,7 +141,6 @@ class Match3Tests( unittest.TestCase):
                   [ None, 4, 5],
                   [None, None, 6] ]
         result = slideDownToFill( given)
-        print result
         self.assertListEqual( result[0], [None, None, 3])    
         self.assertListEqual( result[1], [None, 2, 5])
         self.assertListEqual( result[2], [1, 4, 6])    
@@ -132,6 +151,26 @@ class Match3Tests( unittest.TestCase):
         self.assertEqual(occurred, True)
         self.assertListEqual( top2, [ None, 2] )
         self.assertListEqual( bottom2, [1, 3])
+    def test__removeMatchesInRow_noMatches(self):
+        given = [ 1, 2, 3, 4]
+        result = _removeMatchesInRow(3, given)
+        self.assertListEqual(result, [ 1, 2, 3, 4])
+    def test__removeMatchesInRow_matchAtStart(self):
+        given = [ 2, 2, 2, 4]
+        result = _removeMatchesInRow(3, given)
+        self.assertListEqual(result, [ None, None, None, 4])
+    def test__removeMatchesInRow_matchAtEnd(self):
+        given = [ 4, 2, 2, 2]
+        result = _removeMatchesInRow(3, given)
+        self.assertListEqual(result, [ 4, None, None, None ])
+    def test__removeMatchesInRow_moreThanOneMatch(self):
+        given = [ 4, 2, 2, 2, 3, 7, 7, 7, 9]
+        result = _removeMatchesInRow(3, given)
+        self.assertListEqual(result, [ 4, None, None, None, 3, None, None, None, 9])
+    def test__removeMatchesInRow_moreThanOneMatch(self):
+        given = [ 4, 2, 2, 2, 3, 7, 7, 7, 9]
+        result = _removeMatchesInRow(3, given)
+        self.assertListEqual(result, [ 4, None, None, None, 3, None, None, None, 9])
 
 if __name__ == '__main__':
     unittest.main()
