@@ -49,6 +49,33 @@ def fillEmptyCells( board, minVal, maxVal):
         result.append( newRow)
     return result
 
+def slideDownToFill( board):
+    didWork, board = _slideDownOnce(board)
+    while didWork:
+        didWork, board = _slideDownOnce(board)
+    return board
+
+def _slideDownOnce( board):
+    slideOccurred = False
+    for rowIndex in range(0, len(board) - 1):
+        slideOccurred, topRow, bottomRow = _slideDownRow( board[rowIndex], board[rowIndex+1])
+        board[rowIndex] = topRow
+        board[rowIndex+1] = bottomRow
+    return (slideOccurred, board)
+
+def _slideDownRow( topRow, bottomRow):
+    slideOccurred = False
+    newTopRow = []
+    newBottomRow = []
+    for topCell,bottomCell in zip(topRow, bottomRow):
+        if bottomCell is None and topCell is not None:
+            bottomCell = topCell
+            topCell = None
+            slideOccurred = True
+        newTopRow.append( topCell)
+        newBottomRow.append( bottomCell)
+    return (slideOccurred, newTopRow, newBottomRow)
+
 class Match3Tests( unittest.TestCase):
     def test_pinningOriginalBehavior(self):
         a = [ [ 1, 2, 3], 
@@ -89,7 +116,23 @@ class Match3Tests( unittest.TestCase):
                     observedValues.append(cell)
         observedValues.sort()
         self.assertListEqual( observedValues, [0, 1, 2, 3] )
-    
+    def test_slideDownToFill_slidesCellContentsDownwards_leavingEmptyCells(self):
+        given = [ [ 1, 2, 3],
+                  [ None, 4, 5],
+                  [None, None, 6] ]
+        result = slideDownToFill( given)
+        print result
+        self.assertListEqual( result[0], [None, None, 3])    
+        self.assertListEqual( result[1], [None, 2, 5])
+        self.assertListEqual( result[2], [1, 4, 6])    
+    def test__slideDownRow(self):
+        top = [ 1, 2]
+        bottom = [ None, 3 ]
+        occurred, top2, bottom2 = _slideDownRow( top, bottom)
+        self.assertEqual(occurred, True)
+        self.assertListEqual( top2, [ None, 2] )
+        self.assertListEqual( bottom2, [1, 3])
+
 if __name__ == '__main__':
     unittest.main()
 
