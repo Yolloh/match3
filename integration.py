@@ -12,14 +12,14 @@ def clear3to6Matches(board):
     return board
 
 class IntegrationTests(unittest.TestCase):
-    def test_whatever(self):
-        print "\n"
+    def test_variousBoardOperations(self):
         board = createEmptyBoard(6)
         board = fillEmptyCells(board, 1, 4)
-        print boardToString(board)
+        #print boardToString(board)
         board = clear3to6Matches(board)
-        print boardToString(board)
+        #print boardToString(board)
         board = slideDownToFill( board)
-        print boardToString(board)
+        #print boardToString(board)
         board = clear3to6Matches(board)
-        print boardToString(board)
+        print "\n" + boardToString(board)
+    #def test_clearAndSlideMatchesUntilNoneLeft(self):
