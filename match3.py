@@ -110,7 +110,7 @@ def _removeVerticalMatches( matchLength, board):
     board = _transposeBoard(board)
     return board
 
-def _combineBoards( left, right):
+def combineBoards( left, right):
     result = []
     for leftRow, rightRow in zip(left,right):
         resultRow = []
@@ -125,7 +125,7 @@ def _combineBoards( left, right):
 def removeMatches( matchLength, board):
     rowResult = _removeHorizontalMatches( matchLength, board)
     colResult = _removeVerticalMatches( matchLength, board) 
-    return _combineBoards( rowResult, colResult)
+    return combineBoards( rowResult, colResult)
 
 def boardToString( board):
     result = ""
