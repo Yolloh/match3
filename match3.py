@@ -127,6 +127,18 @@ def removeMatches( matchLength, board):
     colResult = _removeVerticalMatches( matchLength, board) 
     return _combineBoards( rowResult, colResult)
 
+def boardToString( board):
+    result = ""
+    for row in board:
+        rowString = ""
+        for cell in row:
+            if cell is None:
+                rowString += '_'
+            else:
+                rowString += chr(cell + ord('A') - 1)
+        result += ' '.join(rowString) + '\n'
+    return result
+
 class Match3Tests( unittest.TestCase):
     def test_pinningOriginalBehavior(self):
         a = [ [ 1, 2, 3], 
@@ -239,6 +251,12 @@ class Match3Tests( unittest.TestCase):
         self.assertBoardEqual( result, [[ None, None, None],
                                         [ None, 3, 4],
                                         [ None, 2, 4]])
+    def test_boardToString_formatsCorrectly(self):
+        given = [ [1, 1, None],
+                  [1, 3, 4],
+                  [1, 2, 4] ]
+        result = boardToString(given)
+        self.assertEqual(result, "A A _\nA C D\nA B D\n")
 
 if __name__ == '__main__':
     unittest.main()
