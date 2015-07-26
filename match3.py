@@ -5,7 +5,7 @@ import random
 def hasMatchOfExactLength(matchLength, row):
     groups = [(k, sum(1 for i in g)) for k,g in itertools.groupby(row)]
     for group in groups:
-        if group[1] == matchLength:
+        if group[1] == matchLength and group[0] is not None:
             return True
     return False
 
@@ -139,6 +139,12 @@ def boardToString( board):
         result += ' '.join(rowString) + '\n'
     return result
 
+def countMatches(minMatchLength, board):
+    result = []
+    for matchLength in range( minMatchLength, len(board)+1 ):
+        result.append( (matchLength, countMatchN(matchLength, board)) )
+    return result
+
 class Match3Tests( unittest.TestCase):
     def test_pinningOriginalBehavior(self):
         a = [ [ 1, 2, 3], 
@@ -257,6 +263,19 @@ class Match3Tests( unittest.TestCase):
                   [1, 2, 4] ]
         result = boardToString(given)
         self.assertEqual(result, "A A _\nA C D\nA B D\n")
+    def test_countMatchesOnBoard(self):
+        given = [ [1, 1, 1, 1],
+                  [1, 3, 4, 2],
+                  [1, 2, 4, 2],
+                  [3, 2, 4, 2]]
+        result = countMatches(3, given)
+        self.assertEqual(result, [ (3, 3), (4, 1) ])
+    def test_countMatches_ignoresEmptyCells(self):
+        given = [[ None, None, None],
+                 [ None, 3, 4],
+                 [ None, 2, 4]]
+        result = countMatches(3, given)
+        self.assertEqual(result, [ (3,0) ])
 
 if __name__ == '__main__':
     unittest.main()

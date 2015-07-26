@@ -11,15 +11,33 @@ def clear3to6Matches(board):
     board = combineBoards(board, board3)
     return board
 
+def hasMatchesLeft( board):
+    matchesLeft = sum(zip(*countMatches(3, board))[1])
+    return matchesLeft != 0
+
 class IntegrationTests(unittest.TestCase):
-    def test_whatever(self):
-        print "\n"
+    def test_variousBoardOperations(self):
         board = createEmptyBoard(6)
         board = fillEmptyCells(board, 1, 4)
-        print boardToString(board)
+        #print boardToString(board)
         board = clear3to6Matches(board)
-        print boardToString(board)
+        #print boardToString(board)
         board = slideDownToFill( board)
-        print boardToString(board)
+        #print boardToString(board)
         board = clear3to6Matches(board)
-        print boardToString(board)
+        print "various operations:\n" + boardToString(board)
+    def test_clearAndSlideMatchesUntilNoneLeft(self):
+        board = createEmptyBoard(6)
+        board = fillEmptyCells(board, 1, 4)
+        board = clear3to6Matches(board)
+        board = slideDownToFill(board)
+        while hasMatchesLeft(board):
+            board = clear3to6Matches(board)
+            board = slideDownToFill(board)
+        print "fully slid:\n" + boardToString(board)
+    def test_hasMatchesLeft_returnsFalseByDefault(self):
+        given = [[1,2,3], [4,5,6],[ 7,8,9]]
+        self.assertFalse( hasMatchesLeft(given))
+
+if __name__ == '__main__':
+    unittest.main()
